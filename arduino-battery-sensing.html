@@ -1,0 +1,69 @@
+<html>
+<head>
+<title>Arduino Battery Sensing Circuit Calculator</title>
+</head>
+<body>
+<form>
+	<div style="border: solid 1px; margin: 1rem; padding: 0.5rem; width: 15rem;">
+		<div style="text-align:right;">
+			<span style="float: left;">Battery Max Voltage:</span>
+			<input id="bat-max" style="width:3rem;" placeholder="12.6" />v
+		</div>
+		<div style="text-align:right;">
+			<span style="float: left;">Battery Min Voltage:</span>
+			<input id="bat-min" style="width:3rem;" placeholder="9" />v
+		</div>
+	</div>
+	<div style="border: solid 1px; margin: 1rem; padding: 0.5rem; width: 15rem;">
+		<div style="text-align:right;">
+			<span style="float: left;">ADC Max Voltage:</span>
+			<input id="adc-max" style="width:3rem;" placeholder="1.1" />v
+		</div>
+		<div style="text-align:right;">
+			<span style="float: left;">ADC Min Voltage:</span>
+			<input id="adc-min" style="width:3rem;" placeholder="0" />v
+		</div>
+	</div>
+	<div style="margin: 0 1rem; text-align:right; padding: 0.5rem; width: 15rem;">
+		<span style="float: left;">Zenner Drop Diode:</span>
+		<select id="zenner">
+			<option value="0">-none-</option>
+			<option value="2">2v</option>
+			<option value="2.2">2.2v</option>
+			<option value="2.4">2.4v</option>
+			<option value="2.7">2.7v</option>
+			<option value="3">3v</option>
+			<option value="3.3">3.3v</option>
+			<option value="3.6">3.6v</option>
+			<option value="3.9">3.9v</option>
+			<option value="4.3">4.3v</option>
+			<option value="4.7">4.7v</option>
+			<option value="5.1">5.1v</option>
+			<option value="5.6">5.6v</option>
+			<option value="6.2">6.2v</option>
+			<option value="6.8">6.8v</option>
+			<option value="7.5">7.5v</option>
+			<option value="8.2">8.2v</option>
+			<option value="9.1">9.1v</option>
+			<option value="10">10v</option>
+			<option value="11">11v</option>
+			<option value="12">12v</option>
+			<option value="13">13v</option>
+			<option value="15">15v</option>
+			<option value="16">16v</option>
+			<option value="18">18v</option>
+			<option value="20">20v</option>
+			<option value="22">22v</option>
+			<option value="24">24v</option>
+			<option value="27">27v</option>
+			<option value="30">30v</option>
+			<option value="39">39v</option>
+		</select>
+	</div>
+	<div style="margin: 0 1rem; text-align:right; padding: 0.5rem; width: 15rem;">
+		<span style="float: left;">Voltage Divider Current:</span>
+		<input id="adc-min" style="width:3rem;" placeholder="0" />mA
+	</div>
+</form>
+</body>
+</html>
