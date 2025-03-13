@@ -13,7 +13,7 @@
 				</div>
 				<div style="text-align:right;">
 					<span style="float: left;">Battery Min Voltage:</span>
-					<input id="bat-min" style="width:3rem;" placeholder="9" onchange="populateZenner()"/> v
+					<input id="bat-min" style="width:3rem;" placeholder="9" onchange="populateZener()"/> v
 				</div>
 			</div>
 			<div style="border: solid 1px; margin: 1rem; padding: 0.5rem; width: 15rem;">
@@ -27,8 +27,8 @@
 				</div>
 			</div>
 			<div style="margin: 0 1rem; text-align:right; padding: 0.5rem; width: 15rem;">
-				<span style="float: left;">Zenner Drop Diode:</span>
-				<select id="zenner">
+				<span style="float: left;">Zener Drop Diode:</span>
+				<select id="zener">
 					<option value="0">-none-</option>
 					<option value="2">2v</option>
 					<option value="2.2">2.2v</option>
@@ -87,8 +87,8 @@
 				<span id="r2-value" style="width:3rem;" />-</span>
 			</div>
 			<div style="text-align:right;">
-				<span style="float: left;">Zenner Voltage:</span>
-				<span id="zenner-value" style="width:3rem;" />-</span> v
+				<span style="float: left;">Zener Voltage:</span>
+				<span id="zener-value" style="width:3rem;" />-</span> v
 			</div>
 		</div>
 
@@ -146,7 +146,7 @@
 
   resistor_values = [];
   
-  zenner_values = [
+  zener_values = [
 	  2, 2.2, 2.4, 2.7, 
 	  3, 3.3, 3.6, 3.9, 
 	  4.3, 4.7, 
@@ -162,14 +162,14 @@
 	VoltageLow =  parseFloat(document.getElementById('bat-min').value);
 	AdcHigh =  parseFloat(document.getElementById('adc-max').value);
 	AdcLow =  parseFloat(document.getElementById('adc-min').value);
-	VoltageZenner = parseFloat(document.getElementById('zenner').value);
+	VoltageZener = parseFloat(document.getElementById('zener').value);
 	TargetCurrent = parseFloat(document.getElementById('current').value);
 	
 	// initial calculations
 	VoltageRange = VoltageHigh - VoltageLow;
 	VoltageOffset = VoltageHigh - AdcHigh;
-	OffsetVoltageHigh = Math.max((VoltageHigh - VoltageZenner), 0);
-	OffsetVoltageLow = Math.max((VoltageLow - VoltageZenner), 0);
+	OffsetVoltageHigh = Math.max((VoltageHigh - VoltageZener), 0);
+	OffsetVoltageLow = Math.max((VoltageLow - VoltageZener), 0);
 	TargetResistanceTotal = OffsetVoltageHigh / (TargetCurrent / 1000);
 	TargetResistanceR2 = TargetResistanceTotal * (AdcHigh / OffsetVoltageHigh);
 	TargetResistanceR1 = TargetResistanceTotal - TargetResistanceR2;
@@ -209,18 +209,18 @@
 
 	document.getElementById('r1-value').innerHTML = displayResistorValue(resistor_match_R1.value);
 	document.getElementById('r2-value').innerHTML = displayResistorValue(resistor_match_R2.value);
-	document.getElementById('zenner-value').innerHTML = VoltageZenner;
+	document.getElementById('zener-value').innerHTML = VoltageZener;
 	
 	
-	// warn if clipping occurs because of high zenner value
-	if (VoltageLow < VoltageZenner) {
+	// warn if clipping occurs because of high zener value
+	if (VoltageLow < VoltageZener) {
 		document.getElementById('actual-vmin').style.color = "red";
-		document.getElementById('zenner').style.borderColor = "red"
+		document.getElementById('zener').style.borderColor = "red"
 		document.getElementById('bat-min').style.borderColor = "red";
-		if (VoltageHigh < VoltageZenner) document.getElementById('bat-max').style.borderColor = "red";
+		if (VoltageHigh < VoltageZener) document.getElementById('bat-max').style.borderColor = "red";
 	} else {
 		document.getElementById('actual-vmin').style.color = "";
-		document.getElementById('zenner').style.borderColor = ""
+		document.getElementById('zener').style.borderColor = ""
 		document.getElementById('bat-min').style.borderColor = "";
 		document.getElementById('bat-max').style.borderColor = "";
 	}
@@ -252,19 +252,19 @@
 	}
 
 // ---------------------------------------------------------------------------  
-	function populateZenner() {
-		let zennerEl = document.getElementById('zenner');
-		while (zennerEl.children.length) zennerEl.removeChild(zennerEl.children[0]);
+	function populateZener() {
+		let zenerEl = document.getElementById('zener');
+		while (zenerEl.children.length) zenerEl.removeChild(zenerEl.children[0]);
 		let tempNode = document.createElement('option');
 		tempNode.text = "-none-";
 		tempNode.value = "0";
-		zennerEl.appendChild(tempNode);
-		for (let val of zenner_values) {
+		zenerEl.appendChild(tempNode);
+		for (let val of zener_values) {
 			if (val > parseFloat(document.getElementById('bat-min').value)) break;
 			tempNode = document.createElement('option');
 			tempNode.text = val + " v";
 			tempNode.value = val;
-			zennerEl.appendChild(tempNode);
+			zenerEl.appendChild(tempNode);
 		}		
 	}
 
