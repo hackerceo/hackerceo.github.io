@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pairwise Excitation Calculator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 0 24px;
+            color: #222;
+        }
+
+        h1 {
+            font-size: 1.4em;
+            margin-bottom: 24px;
+        }
+
+        .field-group,
+        .description {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+        }
+
+        .output-field {
+            padding: 6px 8px;
+            background: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            min-height: 32px;
+            font-size: 1em;
+            color: #555;
+        }
+
+        .conductor-state {
+            font-family: monospace;
+            font-size: 1.15em;
+            letter-spacing: 0.05em;
+        }
+
+        .error {
+            color: #c00;
+            font-size: 0.88em;
+            margin-top: 4px;
+            min-height: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pairwise Excitation Calculator</h1>
+
+    <div class="field-group">
+        <label for="num-conductors">Number of Conductors</label>
+        <input type="number" id="num-conductors" min="3" step="1" placeholder="Integer ≥ 3">
+        <div class="error" id="conductors-error"></div>
+    </div>
+
+    <div class="field-group">
+        <label for="activation-address-input">Activation Address</label>
+        <input type="number" id="activation-address-input" min="0" step="1" placeholder="0 to N×(N−1)−1">
+        <div class="error" id="address-error"></div>
+    </div>
+
+    <div class="field-group">
+        <label>Conductor State</label>
+        <div class="output-field conductor-state" id="conductor-state">—</div>
+    </div>
+
+    <div class="field-group">
+        <label>Activation Address</label>
+        <div class="output-field" id="activation-address-display">—</div>
+    </div>
+
+    <div class="description">
+        <label>Description</label>
+        <div class="description-field">
+            A pairwise excitation system uses an multi-conductor cable to selectively activate effects by treating each conductor as a node in a matrix, where an effect is triggered by applying +5 V to one conductor and ground to another, driving the LED inside an optoisolator.
+            A controller chooses exactly one “source” conductor (driven high) and one “sink” conductor (pulled low), while ensuring all other conductors remain in a high-impedance (floating) state so no unintended current paths exist.
+            On the software side, each possible conductor pair is encoded as a single “activation address,” which is mathematically mapped to a unique (positive / negative) conductor pair, allowing simple and scalable control of many effects using only a limited number of wires.
+        </div>
+    </div>
+    <div class="description">
+        <label>Total Address Space</label>
+        <pre class="description-field">
+            For 𝑁 = conductorCount:
+
+            totalAddresses = 𝑁 * (𝑁−1)
+
+            Each address corresponds to one valid (𝑖,𝑗) where 𝑖 ≠ 𝑗.
+        </pre>
+    </div>
+    <div class="description">
+        <label>Mapping Formula</label>
+        <pre class="description-field">
+            Let:
+                a = activationAddress
+                N = conductorCount
+
+            Compute positive conductor:
+                positive = (a / N−1)
+
+            Compute intermediate index:
+                k = a mod (N−1)
+
+            Compute negative conductor:
+                if k < positive then negative = k
+                if k >= positive then negative = k + 1
+        </pre>
+    </div>
+
+    <script>
+        const numConductorsInput     = document.getElementById('num-conductors');
+        const activationAddressInput = document.getElementById('activation-address-input');
+        const conductorStateDisplay  = document.getElementById('conductor-state');
+        const addressDisplay         = document.getElementById('activation-address-display');
+        const conductorsError        = document.getElementById('conductors-error');
+        const addressError           = document.getElementById('address-error');
+
+        function clearOutputs() {
+            conductorStateDisplay.textContent = '—';
+            addressDisplay.textContent = '—';
+        }
+
+        function calculate() {
+            conductorsError.textContent = '';
+            addressError.textContent = '';
+            clearOutputs();
+
+            const nRaw = numConductorsInput.value.trim();
+            const aRaw = activationAddressInput.value.trim();
+
+            if (nRaw === '') return;
+
+            const N = Number(nRaw);
+            if (!Number.isInteger(N) || N < 3) {
+                conductorsError.textContent = 'Number of conductors must be a whole number ≥ 3.';
+                return;
+            }
+
+            const maxAddress = N * (N - 1) - 1;
+            activationAddressInput.placeholder = "0 to " + maxAddress;
+            if (aRaw === '') return;
+            const address = Number(aRaw);
+            if (!Number.isInteger(address) || address < 0 || address > maxAddress) {
+                addressError.textContent =
+                    `Activation address must be a whole number from 0 to ${maxAddress} for ${N} conductors.`;
+                return;
+            }
+
+            // --- Core calculation ---
+            // Positive conductor index (0-based)
+            const posIdx = Math.floor(address / (N - 1));
+
+            // Which slot among the remaining conductors gets the negative voltage
+            const negOffset = address % (N - 1);
+
+            // Build the ordered list of conductors that are NOT the positive one
+            const remaining = [];
+            for (let i = 0; i < N; i++) {
+                if (i !== posIdx) remaining.push(i);
+            }
+            const negIdx = remaining[negOffset];
+
+            // Build the state array
+            const state = Array(N).fill('_');
+            state[posIdx] = '+';
+            state[negIdx] = '-';
+
+            // Conductor State: e.g. "[ + - _ ]"
+            conductorStateDisplay.textContent = '[ ' + state.join(' ') + ' ]';
+
+            // Activation Address display: 1-indexed, e.g. "1 / 2"
+            addressDisplay.textContent = `${posIdx + 1} / ${negIdx + 1}`;
+        }
+
+        numConductorsInput.addEventListener('input', calculate);
+        activationAddressInput.addEventListener('input', calculate);
+    </script>
+</body>
+</html>
